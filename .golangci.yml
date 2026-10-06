@@ -1,0 +1,54 @@
+version: "2"
+
+run:
+  timeout: 5m
+  build-tags:
+    - integration
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - contextcheck
+    - depguard
+    - errorlint
+    - gosec
+    - misspell
+    - noctx
+    - sqlclosecheck
+    - unparam
+
+  settings:
+    depguard:
+      rules:
+        http:
+          files:
+            - "internal/http/**/*.go"
+          list-mode: lax
+          deny:
+            - pkg: "person/internal/postgres"
+              desc: HTTP layer must not depend on infrastructure
+        logic:
+          files:
+            - "internal/logic/**/*.go"
+          list-mode: lax
+          deny:
+            - pkg: "person/internal/http"
+              desc: application layer must not depend on transport
+            - pkg: "person/internal/postgres"
+              desc: application layer must not depend on infrastructure
+        domain:
+          files:
+            - "internal/app/**/*.go"
+          list-mode: lax
+          deny:
+            - pkg: "person/internal/http"
+              desc: domain must not depend on transport
+            - pkg: "person/internal/logic"
+              desc: domain must not depend on application layer
+            - pkg: "person/internal/postgres"
+              desc: domain must not depend on infrastructure
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
